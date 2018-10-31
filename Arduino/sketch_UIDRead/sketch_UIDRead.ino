@@ -21,7 +21,7 @@ void loop(){
     return;
   }
 
-  Serial.print("UID: ");
+  // Serial.print("UID: ");
   for(byte i = 0; i<mfrc522.uid.size; i++){
     if(mfrc522.uid.uidByte[i] < 0x10){
       Serial.print(" 0");
