@@ -40,6 +40,7 @@ public class rxSimple {
                     String msg = ino.printMessage();
                     //Se imprime la variable msg
                     JOptionPane.showMessageDialog(null, msg);
+                    System.out.println("aqiiiiiiii"+msg    );
                 }
             } catch (SerialPortException ex) {
                 Logger.getLogger(rxSimple.class.getName()).log(Level.SEVERE, null, ex);
@@ -48,6 +49,9 @@ public class rxSimple {
             }
         }
     };
+    
+   
+            
 
     public static void main(String[] args) {
         try {
