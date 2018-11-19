@@ -6,6 +6,7 @@ import edu.modelo.Paciente;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
 
 
 public class DaoPaciente extends Conexion
@@ -91,6 +92,7 @@ public class DaoPaciente extends Conexion
             }
             
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, e.toString());
         }
      return pacientes;   
     }
@@ -100,7 +102,7 @@ public class DaoPaciente extends Conexion
         ResultSet res=null;
         try {
             this.conectar();
-            String sql="select * from empleado where codigoPaciente=?";
+            String sql="select * from paciente where codigoPaciente=?";
             PreparedStatement pre=this.getCon().prepareCall(sql);
             pre.setString(1,busqueda);
             res = pre.executeQuery();

@@ -5,6 +5,7 @@
  */
 package edu.vista;
 
+import com.panamahitek.ArduinoException;
 import com.panamahitek.PanamaHitek_Arduino;
 import edu.dao.DaoPaciente;
 import edu.modelo.Paciente;
@@ -13,6 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
 import proyecto.arqui.rxSimple;
 
 /**
@@ -21,54 +25,76 @@ import proyecto.arqui.rxSimple;
  */
 public class FrmPaciente extends javax.swing.JFrame {
 
-    /**
-     * Creates new form FrmPaciente
-     */
+    static PanamaHitek_Arduino ino = new PanamaHitek_Arduino();
+    public static String a;
+
     public FrmPaciente() {
+
         initComponents();
         tablaPaciente();
+
     }
-    
-    rxSimple res = new rxSimple();
-    
+
     DefaultTableModel tabla;
     Paciente pa = new Paciente();
     DaoPaciente daoP = new DaoPaciente();
+
+    static SerialPortEventListener listener = new SerialPortEventListener() {
+        @Override
+        //Si se recibe algun dato en el puerto serie, se ejecuta el siguiente metodo
+        public void serialEvent(SerialPortEvent serialPortEvent) {
+            try {
+                /*
+                Los datos en el puerto serie se envian caracter por caracter. Si se
+                desea esperar a terminar de recibir el mensaje antes de imprimirlo, 
+                el metodo isMessageAvailable() devolvera TRUE cuando se haya terminado
+                de recibir el mensaje, el cual podra ser impreso a traves del metodo
+                printMessage()
+                 */
+                if (ino.isMessageAvailable()) {
+                    //Se le asigna el mensaje recibido a la variable msg
+                    String msg = ino.printMessage();
+                    //Se imprime la variable msg
+                    a = msg;
+                    FrmPaciente pa = new FrmPaciente();
+                    pa.txtBuscado.setText(a);
+
+                }
+            } catch (SerialPortException ex) {
+                Logger.getLogger(rxSimple.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ArduinoException ex) {
+                Logger.getLogger(rxSimple.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    };
     
- 
-    
-    public void tablaPaciente()
-    {
-        String [] columnas = {"ID","Codigo","Nombre","Apellido","Edad","Genero"};
-        Object [] obj=new Object[6];
-        tabla = new DefaultTableModel(null,columnas);
+
+    public void tablaPaciente() {
+        String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
+        Object[] obj = new Object[6];
+        tabla = new DefaultTableModel(null, columnas);
         List ls;
-        
-        try
-        {
+
+        try {
             ls = daoP.mostrarPaciente();
-            for (int i=0; i<ls.size(); i++)
-            {
-                pa=(Paciente)ls.get(i);
-                obj[0]=pa.getIdPaciente();
-                obj[1]=pa.getCodigoPaciente();
-                obj[2]=pa.getNombre();
-                obj[3]=pa.getApellido();
-                obj[4]=pa.getEdad();
-                obj[5]=pa.getGenero();
+            for (int i = 0; i < ls.size(); i++) {
+                pa = (Paciente) ls.get(i);
+                obj[0] = pa.getIdPaciente();
+                obj[1] = pa.getCodigoPaciente();
+                obj[2] = pa.getNombre();
+                obj[3] = pa.getApellido();
+                obj[4] = pa.getEdad();
+                obj[5] = pa.getGenero();
                 tabla.addRow(obj);
             }
-            ls=daoP.mostrarPaciente();
+            ls = daoP.mostrarPaciente();
             this.JtbPaciente.setModel(tabla);
-        }
-        catch(Exception e)
-        {
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
         }
     }
-    
-    public void insertar ()throws Exception
-    {
+
+    public void insertar() throws Exception {
         pa.setIdPaciente(ICONIFIED);
         pa.setCodigoPaciente(this.txtCodigoPaciente.getText());
         pa.setNombre(this.txtNombrePaciente.getText());
@@ -80,9 +106,8 @@ public class FrmPaciente extends javax.swing.JFrame {
         tablaPaciente();
         limpiar();
     }
-     
-     public void limpiar()
-    {
+
+    public void limpiar() {
         this.txtIdPaciente.setText("");
         this.txtCodigoPaciente.setText("");
         this.txtNombrePaciente.setText("");
@@ -90,84 +115,60 @@ public class FrmPaciente extends javax.swing.JFrame {
         this.txtEdadPaciente.setText("");
         this.txtGeneroPaciente.setText("");
     }
-    
-     public void llenarTabla()
-    {
+
+    public void llenarTabla() {
         int fila = this.JtbPaciente.getSelectedRow();
-        this.txtIdPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila,0)));
-        this.txtCodigoPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila,1)));
-        this.txtNombrePaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila,2)));
-        this.txtApellidoPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila,3)));
-        this.txtEdadPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila,4)));
-        this.txtGeneroPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila,5)));
+        this.txtIdPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila, 0)));
+        this.txtCodigoPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila, 1)));
+        this.txtNombrePaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila, 2)));
+        this.txtApellidoPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila, 3)));
+        this.txtEdadPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila, 4)));
+        this.txtGeneroPaciente.setText(String.valueOf(this.JtbPaciente.getValueAt(fila, 5)));
     }
-    
-     public void modificar ()
-    {
-        try 
-        {
+
+    public void modificar() {
+        try {
             pa.setIdPaciente(Integer.parseInt(this.txtIdPaciente.getText()));
             pa.setCodigoPaciente(this.txtCodigoPaciente.getText());
             pa.setNombre(this.txtNombrePaciente.getText());
             pa.setApellido(this.txtApellidoPaciente.getText());
             pa.setEdad(Integer.parseInt(this.txtEdadPaciente.getText()));
             pa.setGenero(this.txtGeneroPaciente.getText());
-            int SiONo=JOptionPane.showConfirmDialog(this, "Desea modificar el Paciente? ","Modificar Paciente",JOptionPane.YES_NO_OPTION);
-            
-             if (SiONo==0)
-            {
+            int SiONo = JOptionPane.showConfirmDialog(this, "Desea modificar el Paciente? ", "Modificar Paciente", JOptionPane.YES_NO_OPTION);
+
+            if (SiONo == 0) {
                 daoP.modificarPaciente(pa);
-                JOptionPane.showMessageDialog(rootPane, "Paciente modificado con exito","Confirmacion",JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(rootPane, "Paciente modificado con exito", "Confirmacion", JOptionPane.INFORMATION_MESSAGE);
                 tablaPaciente();
                 limpiar();
+            } else {
+                limpiar();
             }
-             
-            else
-            {
-                 limpiar();
-            }
-        } 
-        
-        catch (Exception ex) 
-        {
-           ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
-     
+
     }
 
-    public void eliminar()
-     {
-          try 
-         {
+    public void eliminar() {
+        try {
             pa.setIdPaciente(Integer.parseInt(this.txtIdPaciente.getText()));
-            int SiONo=JOptionPane.showConfirmDialog(this, "Desea eliminar el Paciente?","Eliminar Perfil",JOptionPane.YES_NO_OPTION);
-            
-            if (SiONo==0)
-            {
+            int SiONo = JOptionPane.showConfirmDialog(this, "Desea eliminar el Paciente?", "Eliminar Perfil", JOptionPane.YES_NO_OPTION);
+
+            if (SiONo == 0) {
                 daoP.eliminarPaciente(pa);
-                JOptionPane.showMessageDialog(rootPane, "Paciente eliminado con exito","Confirmacion",JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(rootPane, "Paciente eliminado con exito", "Confirmacion", JOptionPane.INFORMATION_MESSAGE);
                 tablaPaciente();
                 limpiar();
+            } else {
+                limpiar();
             }
-             
-            else
-            {
-                 limpiar();
-            }
-         } 
-        
-         
-         catch (Exception ex) 
-         {
-           JOptionPane.showMessageDialog(rootPane, ex.toString(),"Error",JOptionPane.ERROR_MESSAGE);
-                   
-         }
-    }
-    
-    PanamaHitek_Arduino ino = new PanamaHitek_Arduino();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(rootPane, ex.toString(), "Error", JOptionPane.ERROR_MESSAGE);
 
-    
-    
+        }
+    }
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -195,6 +196,7 @@ public class FrmPaciente extends javax.swing.JFrame {
         btnMostrar = new javax.swing.JButton();
         txtBuscado = new javax.swing.JTextField();
         btnActualizar = new javax.swing.JButton();
+        btnBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -311,6 +313,18 @@ public class FrmPaciente extends javax.swing.JFrame {
         });
 
         btnActualizar.setText("Actualizar");
+        btnActualizar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnActualizarMouseClicked(evt);
+            }
+        });
+
+        btnBuscar.setText("Buscar");
+        btnBuscar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnBuscarMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -354,7 +368,9 @@ public class FrmPaciente extends javax.swing.JFrame {
                                         .addGap(58, 58, 58)
                                         .addComponent(txtBuscado, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
-                                        .addComponent(btnActualizar, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(btnBuscar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(btnActualizar, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE))))))
                         .addGap(53, 53, 53))))
         );
         layout.setVerticalGroup(
@@ -398,12 +414,14 @@ public class FrmPaciente extends javax.swing.JFrame {
                         .addContainerGap()
                         .addComponent(txtBuscado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(14, 14, 14)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(txtGeneroPaciente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel7)
+                        .addComponent(txtGeneroPaciente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnBuscar))
+                .addGap(25, 25, 25)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 19, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
                 .addComponent(btnMostrar)
                 .addContainerGap())
         );
@@ -424,11 +442,11 @@ public class FrmPaciente extends javax.swing.JFrame {
     }//GEN-LAST:event_btnGuardarMouseClicked
 
     private void JtbPacienteMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_JtbPacienteMouseClicked
-       llenarTabla();
+        llenarTabla();
     }//GEN-LAST:event_JtbPacienteMouseClicked
 
     private void btnEditarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnEditarMouseClicked
-       modificar();
+        modificar();
     }//GEN-LAST:event_btnEditarMouseClicked
 
     private void btnEliminarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnEliminarMouseClicked
@@ -438,6 +456,44 @@ public class FrmPaciente extends javax.swing.JFrame {
     private void btnMostrarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnMostrarMouseClicked
         tablaPaciente();
     }//GEN-LAST:event_btnMostrarMouseClicked
+
+    private void btnActualizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnActualizarMouseClicked
+        this.txtBuscado.setText(a);
+
+    }//GEN-LAST:event_btnActualizarMouseClicked
+
+    private void btnBuscarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnBuscarMouseClicked
+        JOptionPane.showMessageDialog(null, this.txtBuscado.getText());
+        if(this.txtBuscado.getText()==null)
+        {
+            tablaPaciente();
+        }
+        else {
+            String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
+            Object[] obj = new Object[6];
+            tabla = new DefaultTableModel(null, columnas);
+            List ls;
+
+            try {
+                ls = daoP.buscarPaciente(this.txtBuscado.getText());
+            for (int i = 0; i < ls.size(); i++) {
+                pa = (Paciente) ls.get(i);
+                obj[0] = pa.getIdPaciente();
+                obj[1] = pa.getCodigoPaciente();
+                obj[2] = pa.getNombre();
+                obj[3] = pa.getApellido();
+                obj[4] = pa.getEdad();
+                obj[5] = pa.getGenero();
+                tabla.addRow(obj);
+            }
+            ls = daoP.mostrarPaciente();
+            this.JtbPaciente.setModel(tabla);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
+            }
+
+        }
+    }//GEN-LAST:event_btnBuscarMouseClicked
 
     /**
      * @param args the command line arguments
@@ -470,13 +526,26 @@ public class FrmPaciente extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmPaciente().setVisible(true);
+
             }
+
         });
+
+        try {
+            //Se inicializa la conexion con el Arduino en el puerto COM5
+            ino.arduinoRX("COM6", 9600, listener);
+
+        } catch (ArduinoException ex) {
+            Logger.getLogger(rxSimple.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SerialPortException ex) {
+            Logger.getLogger(rxSimple.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTable JtbPaciente;
     private javax.swing.JButton btnActualizar;
+    private javax.swing.JButton btnBuscar;
     private javax.swing.JButton btnEditar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
