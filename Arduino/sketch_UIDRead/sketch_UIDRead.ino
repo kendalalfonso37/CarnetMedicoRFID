@@ -63,8 +63,7 @@ void loop(){
   Serial.println();
   // Pitido del Buzzer
   digitalWrite(buzzPin, HIGH);
-  delay(200);
+  delay(500);
   digitalWrite(buzzPin, LOW);
-  delay(200);
   mfrc522.PICC_HaltA();
 }
