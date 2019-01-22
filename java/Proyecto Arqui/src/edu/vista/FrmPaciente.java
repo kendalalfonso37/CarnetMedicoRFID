@@ -695,6 +695,8 @@ public class FrmPaciente extends javax.swing.JFrame {
 
     private void btnLimpiarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLimpiarMouseClicked
         limpiar();
+        tablaPaciente();
+        tablaConsulta();
     }//GEN-LAST:event_btnLimpiarMouseClicked
 
     private void btnGuardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnGuardarMouseClicked
@@ -718,59 +720,7 @@ public class FrmPaciente extends javax.swing.JFrame {
     }//GEN-LAST:event_btnEliminarMouseClicked
 
     private void txtBuscadoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscadoKeyReleased
-        if (this.txtBuscado.getText().isEmpty()) {
-            String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
-            Object[] obj = new Object[6];
-            tabla = new DefaultTableModel(null, columnas);
-            List ls;
-
-            try {
-                ls = daoP.mostrarPaciente();
-                for (int i = 0; i < ls.size(); i++) {
-                    pa = (Paciente) ls.get(i);
-                    obj[0] = pa.getIdPaciente();
-                    obj[1] = pa.getCodigoPaciente();
-                    obj[2] = pa.getNombre();
-                    obj[3] = pa.getApellido();
-                    obj[4] = pa.getEdad();
-                    obj[5] = pa.getGenero();
-                    tabla.addRow(obj);
-                }
-                ls = daoP.mostrarPaciente();
-                this.JtbPaciente.setModel(tabla);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
-            }
-
-            tablaConsulta();
-
-        } else {
-            String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
-            Object[] obj = new Object[6];
-            tabla = new DefaultTableModel(null, columnas);
-            List ls;
-
-            try {
-                ls = daoP.buscarPaciente(this.txtBuscado.getText());
-                for (int i = 0; i < ls.size(); i++) {
-                    pa = (Paciente) ls.get(i);
-                    obj[0] = pa.getIdPaciente();
-                    obj[1] = pa.getCodigoPaciente();
-                    obj[2] = pa.getNombre();
-                    obj[3] = pa.getApellido();
-                    obj[4] = pa.getEdad();
-                    obj[5] = pa.getGenero();
-                    tabla.addRow(obj);
-                }
-                ls = daoP.mostrarPaciente();
-                this.JtbPaciente.setModel(tabla);
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
-            }
-
-            tablaConsultaBusqueda();
-
-        }
+     
 
     }//GEN-LAST:event_txtBuscadoKeyReleased
 
