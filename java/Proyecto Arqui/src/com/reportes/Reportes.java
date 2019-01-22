@@ -22,7 +22,7 @@ public class Reportes
     public void reportePaciente() throws SQLException, JRException
     {
         Connection conect;
-        conect = DriverManager.getConnection("jdbc:mysql://localhost:3306/arqui2018?user=root&password=grupo10");
+        conect = DriverManager.getConnection("jdbc:mysql://localhost:3306/arqui2018?user=root&password=");
         JasperReport report =null;
         report = (JasperReport) JRLoader.loadObjectFromFile("src\\com\\reportes\\Pacientes.jasper");
         JasperPrint im = JasperFillManager.fillReport(report,null,conect);

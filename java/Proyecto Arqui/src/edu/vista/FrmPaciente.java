@@ -50,12 +50,12 @@ public class FrmPaciente extends javax.swing.JFrame {
 
     }
 
-    DefaultTableModel tabla;
-    DefaultTableModel tabla2;
-    Paciente pa = new Paciente();
-    Consulta con = new Consulta();
-    DaoPaciente daoP = new DaoPaciente();
-    DaoConsulta daoC = new DaoConsulta();
+    static DefaultTableModel tabla;
+    static DefaultTableModel tabla2;
+    static Paciente pa = new Paciente();
+    static Consulta con = new Consulta();
+    static DaoPaciente daoP = new DaoPaciente();
+    static DaoConsulta daoC = new DaoConsulta();
     static SerialPortEventListener listener = new SerialPortEventListener() {
         @Override
         //Si se recibe algun dato en el puerto serie, se ejecuta el siguiente metodo
@@ -73,8 +73,8 @@ public class FrmPaciente extends javax.swing.JFrame {
                     String msg = ino.printMessage();
                     //Se imprime la variable msg
                     a = msg;
-                    FrmPaciente pa = new FrmPaciente();
-                    pa.txtBuscado.setText(a);
+                    setBuscado();
+                    filtrar();
 
                 }
             } catch (SerialPortException ex) {
@@ -82,9 +82,9 @@ public class FrmPaciente extends javax.swing.JFrame {
             } catch (ArduinoException ex) {
                 Logger.getLogger(rxSimple.class.getName()).log(Level.SEVERE, null, ex);
             }
+
         }
     };
-    
 
     public void tablaPaciente() {
         String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
@@ -110,8 +110,8 @@ public class FrmPaciente extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
         }
     }
-    
-     public void tablaConsulta() {
+
+    public static  void tablaConsulta() {
         String[] columnas = {"ID", "Codigo_Pac", "Fecha", "Hora", "Descripcion"};
         Object[] obj = new Object[5];
         tabla2 = new DefaultTableModel(null, columnas);
@@ -129,9 +129,9 @@ public class FrmPaciente extends javax.swing.JFrame {
                 tabla2.addRow(obj);
             }
             ls = daoC.mostrarConsulta();
-            this.JtbConsulta.setModel(tabla2);
+            JtbConsulta.setModel(tabla2);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al mostrar datos" + e.toString());
         }
     }
 
@@ -141,15 +141,12 @@ public class FrmPaciente extends javax.swing.JFrame {
         pa.setNombre(this.txtNombrePaciente.getText());
         pa.setApellido(this.txtApellidoPaciente.getText());
         pa.setEdad(Integer.parseInt(this.SpEdad.getValue().toString()));
-         if(this.RbMasculino.isSelected())
-        {
+        if (this.RbMasculino.isSelected()) {
             pa.setGenero("Masculino");
-        }
-        else
-        {
+        } else {
             pa.setGenero("Femenino");
         }
-        
+
         daoP.insertarPaciente(pa);
         JOptionPane.showMessageDialog(null, "Datos insertados con exito");
         tablaPaciente();
@@ -176,10 +173,10 @@ public class FrmPaciente extends javax.swing.JFrame {
         SpEdad.setValue(edad);
         String genero = String.valueOf(this.JtbPaciente.getValueAt(fila, 5));
         if (genero.toUpperCase().equals("MASCULINO")) {
-                RbMasculino.setSelected(true);
-            } else {
-                RbFemenino.setSelected(true);
-            }
+            RbMasculino.setSelected(true);
+        } else {
+            RbFemenino.setSelected(true);
+        }
     }
 
     public void modificar() {
@@ -189,14 +186,11 @@ public class FrmPaciente extends javax.swing.JFrame {
             pa.setNombre(this.txtNombrePaciente.getText());
             pa.setApellido(this.txtApellidoPaciente.getText());
             pa.setEdad(Integer.parseInt(this.SpEdad.getValue().toString()));
-             if(this.RbMasculino.isSelected())
-             {
-                 pa.setGenero("Masculino");
-             }
-             else
-             {
+            if (this.RbMasculino.isSelected()) {
+                pa.setGenero("Masculino");
+            } else {
                 pa.setGenero("Femenino");
-             }
+            }
             int SiONo = JOptionPane.showConfirmDialog(this, "Desea modificar el Paciente? ", "Modificar Paciente", JOptionPane.YES_NO_OPTION);
 
             if (SiONo == 0) {
@@ -231,16 +225,15 @@ public class FrmPaciente extends javax.swing.JFrame {
 
         }
     }
-    
-    public void tablaConsultaBusqueda()
-    {
+
+    public static void tablaConsultaBusqueda() {
         String[] columnas = {"ID", "Codigo_Pac", "Fecha", "Hora", "Descripcion"};
         Object[] obj = new Object[5];
         tabla2 = new DefaultTableModel(null, columnas);
         List ls;
 
         try {
-            ls = daoC.buscarConsulta(this.txtBuscado.getText());
+            ls = daoC.buscarConsulta(txtBuscado.getText());
             for (int i = 0; i < ls.size(); i++) {
                 con = (Consulta) ls.get(i);
                 obj[0] = con.getIdConsulta();
@@ -251,27 +244,85 @@ public class FrmPaciente extends javax.swing.JFrame {
                 tabla2.addRow(obj);
             }
             ls = daoC.mostrarConsulta();
-            this.JtbConsulta.setModel(tabla2);
+           JtbConsulta.setModel(tabla2);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
+            JOptionPane.showMessageDialog(null, "Error al mostrar datos" + e.toString());
         }
-    
+
     }
-    
-    
-    public void reporteConsulta() throws SQLException, JRException
-    {
+
+    public static void setBuscado() {
+        txtBuscado.setText(FrmPaciente.a);
+    }
+
+    public void reporteConsulta() throws SQLException, JRException {
         Connection conect;
-        conect = DriverManager.getConnection("jdbc:mysql://localhost:3306/arqui2018?user=root&password=grupo10");
-        JasperReport report =null;
+        conect = DriverManager.getConnection("jdbc:mysql://localhost:3306/arqui2018?user=root&password=");
+        JasperReport report = null;
         Map parametro = new HashMap();
         String dato = this.txtBuscado.getText();
-        parametro.put("codigoPaciente",String.valueOf(dato));
+        parametro.put("codigoPaciente", String.valueOf(dato));
         report = (JasperReport) JRLoader.loadObjectFromFile("src\\com\\reportes\\Consulta.jasper");
-        JasperPrint im = JasperFillManager.fillReport(report,parametro,conect);
+        JasperPrint im = JasperFillManager.fillReport(report, parametro, conect);
         JasperViewer ver = new JasperViewer(im);
         ver.setTitle("Consulta");
         ver.setVisible(true);
+    }
+
+    public static void filtrar() {
+        if (txtBuscado.getText().isEmpty()) {
+            String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
+            Object[] obj = new Object[6];
+            tabla = new DefaultTableModel(null, columnas);
+            List ls;
+
+            try {
+                ls = daoP.mostrarPaciente();
+                for (int i = 0; i < ls.size(); i++) {
+                    pa = (Paciente) ls.get(i);
+                    obj[0] = pa.getIdPaciente();
+                    obj[1] = pa.getCodigoPaciente();
+                    obj[2] = pa.getNombre();
+                    obj[3] = pa.getApellido();
+                    obj[4] = pa.getEdad();
+                    obj[5] = pa.getGenero();
+                    tabla.addRow(obj);
+                }
+                ls = daoP.mostrarPaciente();
+                JtbPaciente.setModel(tabla);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar datos" + e.toString());
+            }
+
+            tablaConsulta();
+
+        } else {
+            String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
+            Object[] obj = new Object[6];
+            tabla = new DefaultTableModel(null, columnas);
+            List ls;
+
+            try {
+                ls = daoP.buscarPaciente(txtBuscado.getText());
+                for (int i = 0; i < ls.size(); i++) {
+                    pa = (Paciente) ls.get(i);
+                    obj[0] = pa.getIdPaciente();
+                    obj[1] = pa.getCodigoPaciente();
+                    obj[2] = pa.getNombre();
+                    obj[3] = pa.getApellido();
+                    obj[4] = pa.getEdad();
+                    obj[5] = pa.getGenero();
+                    tabla.addRow(obj);
+                }
+                ls = daoP.mostrarPaciente();
+                JtbPaciente.setModel(tabla);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error al mostrar datos" + e.toString());
+            }
+
+            tablaConsultaBusqueda();
+
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -298,7 +349,6 @@ public class FrmPaciente extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         JtbPaciente = new javax.swing.JTable();
         txtBuscado = new javax.swing.JTextField();
-        btnActualizar = new javax.swing.JButton();
         RbMasculino = new javax.swing.JRadioButton();
         RbFemenino = new javax.swing.JRadioButton();
         SpEdad = new javax.swing.JSpinner();
@@ -420,18 +470,22 @@ public class FrmPaciente extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(JtbPaciente);
 
+        txtBuscado.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtBuscadoFocusGained(evt);
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtBuscadoFocusLost(evt);
+            }
+        });
+        txtBuscado.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtBuscadoActionPerformed(evt);
+            }
+        });
         txtBuscado.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 txtBuscadoKeyReleased(evt);
-            }
-        });
-
-        btnActualizar.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        btnActualizar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/iconos/Update final.png"))); // NOI18N
-        btnActualizar.setText("ACTUALIZAR");
-        btnActualizar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnActualizarMouseClicked(evt);
             }
         });
 
@@ -563,8 +617,6 @@ public class FrmPaciente extends javax.swing.JFrame {
                                 .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(19, 19, 19)
                                 .addComponent(txtBuscado, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnActualizar)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGap(0, 0, Short.MAX_VALUE)
@@ -622,9 +674,7 @@ public class FrmPaciente extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addComponent(jLabel9)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(txtBuscado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(btnActualizar)))
+                                    .addComponent(txtBuscado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(37, 37, 37)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(RbMasculino)
@@ -667,14 +717,8 @@ public class FrmPaciente extends javax.swing.JFrame {
         eliminar();
     }//GEN-LAST:event_btnEliminarMouseClicked
 
-    private void btnActualizarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnActualizarMouseClicked
-        this.txtBuscado.setText(a);
-
-    }//GEN-LAST:event_btnActualizarMouseClicked
-
     private void txtBuscadoKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscadoKeyReleased
-        if(this.txtBuscado.getText().isEmpty())
-        {
+        if (this.txtBuscado.getText().isEmpty()) {
             String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
             Object[] obj = new Object[6];
             tabla = new DefaultTableModel(null, columnas);
@@ -697,22 +741,18 @@ public class FrmPaciente extends javax.swing.JFrame {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
             }
-            
+
             tablaConsulta();
-        
-        }
-        else
-        {
+
+        } else {
             String[] columnas = {"ID", "Codigo", "Nombre", "Apellido", "Edad", "Genero"};
             Object[] obj = new Object[6];
             tabla = new DefaultTableModel(null, columnas);
             List ls;
 
-            try 
-            {
+            try {
                 ls = daoP.buscarPaciente(this.txtBuscado.getText());
-                for (int i = 0; i < ls.size(); i++) 
-                {
+                for (int i = 0; i < ls.size(); i++) {
                     pa = (Paciente) ls.get(i);
                     obj[0] = pa.getIdPaciente();
                     obj[1] = pa.getCodigoPaciente();
@@ -727,11 +767,11 @@ public class FrmPaciente extends javax.swing.JFrame {
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error al mostrar datos" + e.toString());
             }
-            
+
             tablaConsultaBusqueda();
-        
+
         }
-                
+
     }//GEN-LAST:event_txtBuscadoKeyReleased
 
     private void btnImprimirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnImprimirMouseClicked
@@ -740,8 +780,7 @@ public class FrmPaciente extends javax.swing.JFrame {
             re.reportePaciente();
         } catch (JRException ex) {
             Logger.getLogger(FrmPaciente.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(FrmPaciente.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_btnImprimirMouseClicked
@@ -751,11 +790,22 @@ public class FrmPaciente extends javax.swing.JFrame {
             reporteConsulta();
         } catch (JRException ex) {
             Logger.getLogger(FrmPaciente.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
             Logger.getLogger(FrmPaciente.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_jButton1MouseClicked
+
+    private void txtBuscadoFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBuscadoFocusLost
+
+    }//GEN-LAST:event_txtBuscadoFocusLost
+
+    private void txtBuscadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscadoActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtBuscadoActionPerformed
+
+    private void txtBuscadoFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_txtBuscadoFocusGained
+
+    }//GEN-LAST:event_txtBuscadoFocusGained
 
     /**
      * @param args the command line arguments
@@ -805,12 +855,11 @@ public class FrmPaciente extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTable JtbConsulta;
-    private javax.swing.JTable JtbPaciente;
+    private static javax.swing.JTable JtbConsulta;
+    private static javax.swing.JTable JtbPaciente;
     private javax.swing.JRadioButton RbFemenino;
     private javax.swing.JRadioButton RbMasculino;
     private javax.swing.JSpinner SpEdad;
-    private javax.swing.JButton btnActualizar;
     private javax.swing.JButton btnEditar;
     private javax.swing.JButton btnEliminar;
     private javax.swing.JButton btnGuardar;
@@ -832,7 +881,7 @@ public class FrmPaciente extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField txtApellidoPaciente;
-    private javax.swing.JTextField txtBuscado;
+    private static javax.swing.JTextField txtBuscado;
     private javax.swing.JTextField txtCodigoPaciente;
     private javax.swing.JTextField txtIdPaciente;
     private javax.swing.JTextField txtNombrePaciente;

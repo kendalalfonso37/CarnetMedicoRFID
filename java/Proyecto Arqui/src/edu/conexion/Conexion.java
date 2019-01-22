@@ -29,7 +29,7 @@ public class Conexion
         try 
         {
            Class.forName("com.mysql.jdbc.Driver"); 
-           con=DriverManager.getConnection("jdbc:mysql://localhost:3306/arqui2018?user=root&password=grupo10");
+           con=DriverManager.getConnection("jdbc:mysql://localhost:3306/arqui2018?user=root&password=");
           
         } 
         
